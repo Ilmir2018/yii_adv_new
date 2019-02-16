@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\forms\TaskAttachmentsAddForm;
 //use common\models\tables\TaskAttachments;
+use common\models\tables\TaskAttachments;
 use common\models\tables\TaskComments;
 use common\models\tables\Tasks;
 use common\models\tables\TaskStatuses;
@@ -60,11 +61,17 @@ class TaskController extends Controller
     {
         $model = new TaskComments();
         if($model->load(\Yii::$app->request->post()) && $model->save()){
-            \Yii::$app->session->setFlash('success', "Комментарий добавлен");
+            $id = $model->task_id;
+           // \Yii::$app->session->setFlash('success', "Комментарий добавлен");
+            return $this->renderAjax('_comments', [
+                'model' => Tasks::findOne($id),
+                'taskCommentForm' => new TaskComments(),
+                'userId' => \Yii::$app->user->id
+            ]);
         }else {
-            \Yii::$app->session->setFlash('error', "Не удалось добавить комментарий");
+           // \Yii::$app->session->setFlash('error', "Не удалось добавить комментарий");
         }
-        $this->redirect(\Yii::$app->request->referrer);
+        //$this->redirect(\Yii::$app->request->referrer);
 
     }
 
@@ -74,13 +81,15 @@ class TaskController extends Controller
         $model->load(\Yii::$app->request->post());
         $model->file = UploadedFile::getInstance($model, 'file');
         if($model->save()){
-            \Yii::$app->session->setFlash('success', "Файл добавлен");
+            return $this->renderAjax('_comments', [
+                'model' => Tasks::findOne($id),
+                'taskCommentForm' => new TaskAttachments(),
+                'userId' => \Yii::$app->user->id
+            ]);
+            //\Yii::$app->session->setFlash('success', "Файл добавлен");
         }else {
-            \Yii::$app->session->setFlash('error', "Не удалось добавить файл");
+           // \Yii::$app->session->setFlash('error', "Не удалось добавить файл");
         }
-        $this->redirect(\Yii::$app->request->referrer);
-
-
-
+        //$this->redirect(\Yii::$app->request->referrer);
     }
 }

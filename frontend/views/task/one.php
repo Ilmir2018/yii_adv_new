@@ -44,40 +44,20 @@ use \yii\helpers\Html;
     </div>
 </div>
 <div class="attachments">
-    <h3>Вложения</h3>
-    <?php $form = ActiveForm::begin([
-        'action' => Url::to(['task/add-attachment']),
-        'options' => ['class' => "form-inline"]
-    ]);?>
-    <?=$form->field($taskAttachmentForm, 'taskId')->hiddenInput(['value' => $model->id])->label(false);?>
-    <?=$form->field($taskAttachmentForm, 'file')->fileInput();?>
-    <?=Html::submitButton("Добавить",['class' => 'btn btn-default']);?>
-    <?ActiveForm::end()?>
-    <hr>
-    <div class="attachments-history">
-        <?foreach ($model->taskAttachments as $file): ?>
-            <a href="/img/tasks/<?=$file->path?>">
-                <img src="/img/tasks/small/<?=$file->path?>" alt="">
-            </a>
-        <?php endforeach;?>
-    </div>
-    <div class="task-history">
-        <div class="comments">
-            <h3>Комментарии</h3>
-            <?php $form = ActiveForm::begin(['action' => Url::to(['task/add-comment'])]);?>
-            <?=$form->field($taskCommentForm, 'user_id')->hiddenInput(['value' => $userId])->label(false);?>
-            <?=$form->field($taskCommentForm, 'task_id')->hiddenInput(['value' => $model->id])->label(false);?>
-            <?=$form->field($taskCommentForm, 'content')->textInput();?>
-            <?=Html::submitButton("Добавить",['class' => 'btn btn-default']);?>
-            <?ActiveForm::end()?>
-            <hr>
-            <div class="comment-history">
-                <?foreach ($model->taskComments as $comment): ?>
-                    <p><strong><?=$comment->user->username?></strong>: <?=$comment->content?></p>
-                <?php endforeach;?>
-            </div>
-        </div>
-    </div>
+    <?= $this->render('_attachments', [
+        'model' => $model,
+        'taskAttachmentForm' => $taskAttachmentForm
+    ]);
+    ?>
+</div>
+<div class="task-history">
+    <?= $this->render('_comments', [
+            'model' => $model,
+        'taskCommentForm' => $taskCommentForm,
+        'userId' => $userId
+    ]);
+    ?>
+</div>
     <div class="task-chat">
         <form action="#" name="chat_form" id="chat_form">
             <label>
