@@ -10,6 +10,7 @@ namespace console\controllers;
 
 
 use common\models\tables\TelegramOffset;
+use common\models\tables\TelegramSubscribe;
 use SonkoDmitry\Yii\TelegramBot\Component;
 use TelegramBot\Api\Types\Message;
 use TelegramBot\Api\Types\Update;
@@ -37,9 +38,7 @@ class TelegramController extends Controller
         if($updCount > 0){
             foreach ($updates as $update) {
                 $this->updateOffset($update);
-                if ($message = $update->getMessage()){
-                    $this->processComand($message);
-                }
+                $this->processComand($update->getMessage());
             }
             echo "Новых сообщений: " . $updCount . PHP_EOL;
         }else{
@@ -69,6 +68,29 @@ class TelegramController extends Controller
 
     private function processComand(Message $message)
     {
-        var_dump($message);
+        $params = explode(" ", $message->getText());
+        $command = $params[0];
+        $response = "Unknown command";
+        switch ($command){
+            case '/help':
+                $response = "Доступные команды: \n";
+                $response .= "/help - список комманд \n";
+                $response .= "/project_create ##project_name## - создание проекта\n";
+                $response .= "/task_create ##responsible## ##project## - создание таска\n";
+                $response .= "/sp_create - подписка на создание проекта \n";
+                break;
+            case "/sp_create":
+                $model = new TelegramSubscribe([
+                   'chat_id' => $message->getFrom()->getId(),
+                    'channel' => TelegramSubscribe::CHANNEL_PROJECTS_CREATE
+                ]);
+                if($model->save()){
+                    $response = 'Вы подписаны на обновление!';
+                }else{
+                    $response = 'error';
+                }
+        }
+
+        $this->bot->sendMessage($message->getFrom()->getId(), $response);
     }
 }
